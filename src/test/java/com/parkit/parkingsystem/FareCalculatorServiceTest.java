@@ -21,12 +21,12 @@ public class FareCalculatorServiceTest {
 	private Ticket ticket;
 
 	@BeforeAll
-	private static void setUp() {
+	public static void setUp() {
 		fareCalculatorService = new FareCalculatorService();
 	}
 
 	@BeforeEach
-	private void setUpPerTest() {
+	public void setUpPerTest() {
 		ticket = new Ticket();
 	}
 
@@ -143,7 +143,7 @@ public class FareCalculatorServiceTest {
 		ticket.setOutTime(outTime);
 		ticket.setParkingSpot(parkingSpot);
 		fareCalculatorService.calculateFare(ticket, false);
-		assertEquals((0.25 * 0), ticket.getPrice());
+		assertEquals(0, ticket.getPrice());
 	}
 
 	@Test
@@ -158,7 +158,7 @@ public class FareCalculatorServiceTest {
 		ticket.setOutTime(outTime);
 		ticket.setParkingSpot(parkingSpot);
 		fareCalculatorService.calculateFare(ticket, false);
-		assertEquals((0.25 * 0), ticket.getPrice());
+		assertEquals(0, ticket.getPrice());
 	}
 
 	@Test
