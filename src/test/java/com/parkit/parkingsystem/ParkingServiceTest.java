@@ -58,8 +58,10 @@ public class ParkingServiceTest {
 
 	@Test
 	public void processExitingVehicleTest() {
+		when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(2);
 		parkingService.processExitingVehicle();
 		verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+
 	}
 
 }
