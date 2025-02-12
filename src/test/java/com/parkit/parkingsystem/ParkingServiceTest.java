@@ -3,6 +3,7 @@ package com.parkit.parkingsystem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -74,9 +75,51 @@ public class ParkingServiceTest {
 	@Test
 	public void processExitingVehicleTest() {
 		when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(2);
+
 		parkingService.processExitingVehicle();
+
 		verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
 
+	}
+
+	@Test
+	public void processExitingVehicleTestUnableUpdate() {
+
+		when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+
+		parkingService.processExitingVehicle();
+
+		verify(ticketDAO, times(1)).updateTicket(any(Ticket.class));
+	}
+
+	@Test
+	public void testGetNextParkingNumberIfAvailable() {
+		when(inputReaderUtil.readSelection()).thenReturn(1);
+		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+
+		parkingService.getNextParkingNumberIfAvailable();
+
+		verify(parkingSpotDAO, times(1)).getNextAvailableSlot(any(ParkingType.class));
+
+	}
+
+	@Test
+	public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() {
+		when(inputReaderUtil.readSelection()).thenReturn(1);
+		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
+
+		parkingService.getNextParkingNumberIfAvailable();
+
+		verify(parkingSpotDAO, times(1)).getNextAvailableSlot(any(ParkingType.class));
+	}
+
+	@Test
+	public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() {
+		when(inputReaderUtil.readSelection()).thenReturn(3);
+
+		parkingService.getNextParkingNumberIfAvailable();
+
+		verify(inputReaderUtil, times(1)).readSelection();
 	}
 
 }
