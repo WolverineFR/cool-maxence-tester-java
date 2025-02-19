@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
@@ -69,25 +70,30 @@ public class ParkingDataBaseIT {
 	public void testParkingLotExit() throws InterruptedException {
 		testParkingACar();
 
-		Thread.sleep(100); // add time to make exit time greater than arrival time
+		Thread.sleep(500); // add time to make exit time greater than arrival time
 
-		ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+		ParkingService parkingService = new ParkingService(inputReaderUtil,
+				parkingSpotDAO, ticketDAO);
 		parkingService.processExitingVehicle();
 
 		assertNotNull(ticketDAO.getTicket("ABCDEF").getOutTime());
 		assertNotNull(ticketDAO.getTicket("ABCDEF").getPrice());
 	}
 
-	/*
-	 * @Test public void testParkingLotExitRecurringUser() { testParkingACar();
-	 * 
-	 * ParkingService parkingService = new ParkingService(inputReaderUtil,
-	 * parkingSpotDAO, ticketDAO); parkingService.processExitingVehicle();
-	 * 
-	 * assertNotNull(ticketDAO.getTicket("ABCDEF").getOutTime());
-	 * assertNotNull(ticketDAO.getTicket("ABCDEF").getPrice());
-	 * 
-	 * }
-	 */
+	@Test
+	public void testParkingLotExitRecurringUser() {
+		// testParkingAcar();
+
+		ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+
+		parkingService.processIncomingVehicle();
+		parkingService.processIncomingVehicle();
+
+		parkingService.processExitingVehicle();
+
+		assertNotNull(ticketDAO.getTicket("ABCDEF").getOutTime());
+		assertEquals(ticketDAO.getTicket("ABCDEF").getPrice(), (Fare.CAR_RATE_PER_HOUR) * 0.95, 0.01);
+
+	}
 
 }
