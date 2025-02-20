@@ -5,6 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +18,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
+import com.parkit.parkingsystem.model.ParkingSpot;
+import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 
@@ -28,6 +35,7 @@ public class ParkingDataBaseIT {
 	private static ParkingSpotDAO parkingSpotDAO;
 	private static TicketDAO ticketDAO;
 	private static DataBasePrepareService dataBasePrepareService;
+	private static final Logger logger = LogManager.getLogger("ParkingService");
 
 	@Mock
 	private static InputReaderUtil inputReaderUtil;
@@ -59,8 +67,7 @@ public class ParkingDataBaseIT {
 		parkingService.processIncomingVehicle();
 
 		assertNotNull(ticketDAO.getTicket("ABCDEF"));
-		assertEquals("ABCDEF",
-				ticketDAO.getTicket("ABCDEF").getVehicleRegNumber());
+		assertEquals("ABCDEF", ticketDAO.getTicket("ABCDEF").getVehicleRegNumber());
 		assertNotNull(ticketDAO.getTicket("ABCDEF").getParkingSpot());
 		assertFalse(ticketDAO.getTicket("ABCDEF").getParkingSpot().isAvailable());
 
@@ -81,13 +88,19 @@ public class ParkingDataBaseIT {
 	}
 
 	@Test
-	public void testParkingLotExitRecurringUser() {
-		// testParkingAcar();
+	public void testParkingLotExitRecurringUser() throws InterruptedException {
+		testParkingACar();
+		testParkingACar();
 
 		ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
-		parkingService.processIncomingVehicle();
-		parkingService.processIncomingVehicle();
+		Ticket ticket = new Ticket();
+		ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000))); // simulation of arrival one hour
+																					// before
+		ticket.setVehicleRegNumber("ABCDEF");
+		ticket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
+
+		ticketDAO.saveTicket(ticket);
 
 		parkingService.processExitingVehicle();
 
